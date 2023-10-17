@@ -1,6 +1,6 @@
 import { Router } from "express";
 import pool from "../database.js";
-import { validateEmail, validateNickname } from "../validations/usuarios.validation.js";
+import { validateEmail, validateNickname, validateRepeatPassword } from "../validations/usuarios.validation.js";
 
 const usuarioRouter = Router();
 
@@ -44,12 +44,21 @@ usuarioRouter.get('/login', async (req, res) => {
 usuarioRouter.post('/register', async (req, res) => {
     try {
         const {email, password, role, nickname} = req.body;
+        const repeatPassword = req.body.repeatpass;
+
+        // VALIDAR EMAIL Y NICKNAME
         if (await validateEmail(email) === true && await validateNickname(nickname) === true) {
-            const newUsuario = {
-                email, password, role, nickname
+
+            // VALIDACIÓN DE REPETICIÓN DE CONTRASEÑA
+            if (await validateRepeatPassword(password, repeatPassword) === true) {
+                const newUsuario = {
+                    email, password, role, nickname
+                }
+                await pool.query("INSERT INTO usuario SET ?", [newUsuario]);
+                res.status(200).json({message: "Usuario Registrado correctamente"});
+            } else {
+                res.status(401).json({message: "Error: las contraseñas no son parecidas"});
             }
-            await pool.query("INSERT INTO usuario SET ?", [newUsuario]);
-            res.status(200).json({message: "Usuario Registrado correctamente"});
         } else {
             if (await validateEmail(email) === false) return res.status(401).json({message: "Ya existe un usuario registrado con ése correo"});
             if (await validateNickname(nickname) === false) return res.status(401).json({message: "Nickname no disponible"});
