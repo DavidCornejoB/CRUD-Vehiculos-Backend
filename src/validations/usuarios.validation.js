@@ -8,6 +8,13 @@ export async function validateEmail(email) {
     return false;
 }
 
+export async function validateRepeatPassword(password, repeatPassword){
+    if (password === repeatPassword) {
+        return true;
+    }
+    return false;
+}
+
 export async function validateNickname(nickname) {
     const [usuario] = await pool.query("SELECT * FROM usuario WHERE nickname = ?", [nickname]);
     if (usuario.length === 0) {
