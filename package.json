@@ -1,0 +1,21 @@
+{
+  "name": "crud-vehiculos",
+  "version": "1.0.0",
+  "description": "Backend para registro de vehículos - personas - matrículas",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx nodemon ./src/index.js"
+  },
+  "author": "David Cornejo B <luisdavidcorbra24@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

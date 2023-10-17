@@ -1,0 +1,6 @@
+CREATE TABLE usuario(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    role VARCHAR(30) NOT NULL
+);
