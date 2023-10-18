@@ -1,4 +1,5 @@
 import  express from "express";
+import cors from "cors";
 import morgan from "morgan";
 import usuarioRouter from "../src/routes/usuarios.route.js";
 
@@ -12,6 +13,8 @@ app.set('port', process.env.PORT || 3000);
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+app.use(cors());
 
 // ROUTES
 app.use(usuarioRouter);
