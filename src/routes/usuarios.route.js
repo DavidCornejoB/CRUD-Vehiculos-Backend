@@ -2,6 +2,7 @@ import { Router } from "express";
 import pool from "../database.js";
 import { validateEmail, validateNickname, validateRepeatPassword } from "../validations/usuarios.validation.js";
 import { jsonResponse } from "../lib/jsonResponse.js";
+import { createAccessToken, createRefreshToken } from "../tokens/usuarios.tokens.js";
 
 const usuarioRouter = Router();
 
@@ -11,9 +12,9 @@ const usuarioRouter = Router();
 usuarioRouter.get('/userList', async (req, res) => {
     try {
         const [result] = await pool.query("SELECT * FROM usuario");
-        res.status(200).json({result: result});
+        return res.status(200).json(jsonResponse(200, {result}));
     } catch (error) {
-        res.status(500).json({message: error.message});
+        return res.status(500).json(jsonResponse(500, {error: error.message}));
     }
 });
 
@@ -32,7 +33,9 @@ usuarioRouter.get('/login', async (req, res) => {
         const usuarioObtenido = usuario[0];
         if (usuarioObtenido) {
             if (usuarioObtenido.password === password) {
-                return res.status(200).json(jsonResponse(200, {message: usuarioObtenido}));
+                const accessToken = createAccessToken(usuarioObtenido);
+                const refreshToken = createRefreshToken(usuarioObtenido);
+                return res.status(200).json(jsonResponse(200, {message: usuarioObtenido, acctoken: accessToken, reftoken: refreshToken}));
             } else {
                 return res.status(401).json(jsonResponse(401, {error: "Error: Credenciales incorrectas"}));
             }
@@ -40,7 +43,6 @@ usuarioRouter.get('/login', async (req, res) => {
             return res.status(404).json(jsonResponse(404, {error: "Usuario no registrado"}));
         }
     } catch (error) {
-        res.status(500).json({message: error.message});
         return res.status(500).json(jsonResponse(500, {error: error.message}));
     }
 });
