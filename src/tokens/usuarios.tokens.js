@@ -1,7 +1,7 @@
 import pkg from 'jsonwebtoken';
 
 function signToken(payload, isAccessToken) {
-    return pkg.sign(payload, isAccessToken? process.env.ACCESS_TOKEN_SECRET : process.env.REFRESH_TOKEN_SECRET, {algorithm: "HS256", expiresIn: 3600});
+    return pkg.sign(payload, isAccessToken? process.env.ACCESS_TOKEN_SECRET : process.env.REFRESH_TOKEN_SECRET, {algorithm: "HS256", expiresIn: "1h"});
 }
 
 function generateAccessToken(user) {
