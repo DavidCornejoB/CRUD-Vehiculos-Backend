@@ -1,6 +1,7 @@
 import { Router } from "express";
 import pool from "../database.js";
 import { validateEmail, validateNickname, validateRepeatPassword } from "../validations/usuarios.validation.js";
+import { jsonResponse } from "../lib/jsonResponse.js";
 
 const usuarioRouter = Router();
 
@@ -21,20 +22,26 @@ usuarioRouter.get('/userList', async (req, res) => {
  */
 usuarioRouter.get('/login', async (req, res) => {
     try {
-        const {email, password} = req.body;
+        const {email, password} = req.headers;
+
+        if (!!!email || !!!password) {
+            return res.status(400).json(jsonResponse(400, {error: "No se permiten campos vacíos"}));
+        }
+
         const [usuario] = await pool.query("SELECT * FROM usuario WHERE email = ?", [email]);
         const usuarioObtenido = usuario[0];
         if (usuarioObtenido) {
             if (usuarioObtenido.password === password) {
-                res.status(200).json({message: usuarioObtenido});
+                return res.status(200).json(jsonResponse(200, {message: usuarioObtenido}));
             } else {
-                res.status(401).json({message: "Error: Credenciales incorrectas"});
+                return res.status(401).json(jsonResponse(401, {error: "Error: Credenciales incorrectas"}));
             }
         } else {
-            res.status(404).json({message: "Usuario no registrado"});
+            return res.status(404).json(jsonResponse(404, {error: "Usuario no registrado"}));
         }
     } catch (error) {
         res.status(500).json({message: error.message});
+        return res.status(500).json(jsonResponse(500, {error: error.message}));
     }
 });
 
@@ -46,6 +53,11 @@ usuarioRouter.post('/register', async (req, res) => {
         const {email, password, role, nickname} = req.body;
         const repeatPassword = req.body.repeatpass;
 
+        //VALIDAR QUE NO EXISTAN CAMPOS VACÍOS
+        if (!!!email || !!!password || !!!role || !!!nickname || !!!repeatPassword) {
+            return res.status(400).json(jsonResponse(400, {error: "No se permiten campos vacíos"}));
+        }
+
         // VALIDAR EMAIL Y NICKNAME
         if (await validateEmail(email) === true && await validateNickname(nickname) === true) {
 
@@ -55,16 +67,16 @@ usuarioRouter.post('/register', async (req, res) => {
                     email, password, role, nickname
                 }
                 await pool.query("INSERT INTO usuario SET ?", [newUsuario]);
-                res.status(200).json({message: "Usuario Registrado correctamente"});
+                return res.status(200).json(jsonResponse(200, {message: "Usuario Registrado correctamente"}));
             } else {
-                res.status(401).json({message: "Error: las contraseñas no son parecidas"});
+                return res.status(401).json(jsonResponse(401, {error: "Error: las contraseñas no son parecidas"}));
             }
         } else {
-            if (await validateEmail(email) === false) return res.status(401).json({message: "Ya existe un usuario registrado con ése correo"});
-            if (await validateNickname(nickname) === false) return res.status(401).json({message: "Nickname no disponible"});
+            if (await validateEmail(email) === false) return res.status(401).json(jsonResponse(401, {message: "Ya existe un usuario registrado con ése correo"}));
+            if (await validateNickname(nickname) === false) return res.status(401).json(jsonResponse(401, {message: "Ya existe un usuario con ése nickname"}));
         }
     } catch (error) {
-        res.status(500).json({message: error.message});
+        return res.status(500).json(jsonResponse(500, {error: "No pudo registrarse el usuario"}));
     }
 });
 
